@@ -17,7 +17,6 @@ export interface DiscordEmbed {
 }
 
 export async function sendDM(discordUserId: string, embed: DiscordEmbed): Promise<void> {
-  // Crear/obtener canal DM
   const dmRes = await fetch(`${DISCORD_API}/users/@me/channels`, {
     method: "POST",
     headers: {
@@ -28,7 +27,7 @@ export async function sendDM(discordUserId: string, embed: DiscordEmbed): Promis
   });
   if (!dmRes.ok) {
     const text = await dmRes.text();
-    throw new Error(`No se pudo abrir DM con Discord: ${dmRes.status} ${text}`);
+    throw new Error(`${dmRes.status} ${text}`);
   }
   const channel = (await dmRes.json()) as { id: string };
 
@@ -42,7 +41,7 @@ export async function sendDM(discordUserId: string, embed: DiscordEmbed): Promis
   });
   if (!msgRes.ok) {
     const text = await msgRes.text();
-    throw new Error(`Error enviando DM: ${msgRes.status} ${text}`);
+    throw new Error(`${msgRes.status} ${text}`);
   }
 }
 
