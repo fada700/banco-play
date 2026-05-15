@@ -1,10 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { getMe } from "@/lib/usuario.functions";
 import { formatMXN, maskCardNumber, greetingByHour } from "@/lib/format";
-import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/home")({
   component: HomePage,
@@ -118,26 +117,22 @@ function HomePage() {
 
       {/* Acciones */}
       <section className="container-app mt-5 grid grid-cols-3 gap-3">
-        {[
-          { label: "Depositar" },
-          { label: "Retirar" },
-          { label: "Transferir" },
-        ].map((a) => (
-          <button
-            key={a.label}
-            className="bmx-tap rounded-2xl bg-primary text-primary-foreground py-4 text-sm font-semibold"
-            onClick={() => alert(`${a.label} — disponible en la siguiente fase`)}
-          >
-            {a.label}
-          </button>
-        ))}
+        <Link to="/depositar" className="bmx-tap rounded-2xl bg-primary text-primary-foreground py-4 text-sm font-semibold text-center">
+          Depositar
+        </Link>
+        <Link to="/retirar" className="bmx-tap rounded-2xl bg-primary text-primary-foreground py-4 text-sm font-semibold text-center">
+          Retirar
+        </Link>
+        <Link to="/transferir" className="bmx-tap rounded-2xl bg-primary text-primary-foreground py-4 text-sm font-semibold text-center">
+          Transferir
+        </Link>
       </section>
 
       {/* Movimientos */}
       <section className="container-app mt-7">
         <div className="flex items-baseline justify-between">
           <h2 className="text-base font-semibold">Últimos movimientos</h2>
-          <span className="text-xs text-muted-foreground">Recientes</span>
+          <Link to="/historial" className="text-xs text-muted-foreground underline">Ver todos</Link>
         </div>
         <div className="mt-3 rounded-2xl border border-border bg-surface divide-y divide-border">
           {data.ultimos_movimientos.length === 0 && (
@@ -162,15 +157,6 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Logout */}
-      <div className="container-app mt-8 text-center">
-        <button
-          onClick={async () => { await supabase.auth.signOut(); window.location.replace("/login"); }}
-          className="text-xs text-muted-foreground underline"
-        >
-          Cerrar sesión
-        </button>
-      </div>
     </div>
   );
 }

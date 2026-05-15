@@ -14,7 +14,13 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthCodeRouteImport } from './routes/auth/code'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as AuthenticatedTransferirRouteImport } from './routes/_authenticated/transferir'
+import { Route as AuthenticatedTarjetasRouteImport } from './routes/_authenticated/tarjetas'
+import { Route as AuthenticatedRetirarRouteImport } from './routes/_authenticated/retirar'
+import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedHistorialRouteImport } from './routes/_authenticated/historial'
+import { Route as AuthenticatedDepositarRouteImport } from './routes/_authenticated/depositar'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -40,23 +46,65 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedTransferirRoute = AuthenticatedTransferirRouteImport.update({
+  id: '/transferir',
+  path: '/transferir',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTarjetasRoute = AuthenticatedTarjetasRouteImport.update({
+  id: '/tarjetas',
+  path: '/tarjetas',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedRetirarRoute = AuthenticatedRetirarRouteImport.update({
+  id: '/retirar',
+  path: '/retirar',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   id: '/home',
   path: '/home',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedHistorialRoute = AuthenticatedHistorialRouteImport.update({
+  id: '/historial',
+  path: '/historial',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedDepositarRoute = AuthenticatedDepositarRouteImport.update({
+  id: '/depositar',
+  path: '/depositar',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/depositar': typeof AuthenticatedDepositarRoute
+  '/historial': typeof AuthenticatedHistorialRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
+  '/retirar': typeof AuthenticatedRetirarRoute
+  '/tarjetas': typeof AuthenticatedTarjetasRoute
+  '/transferir': typeof AuthenticatedTransferirRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/code': typeof AuthCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/depositar': typeof AuthenticatedDepositarRoute
+  '/historial': typeof AuthenticatedHistorialRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
+  '/retirar': typeof AuthenticatedRetirarRoute
+  '/tarjetas': typeof AuthenticatedTarjetasRoute
+  '/transferir': typeof AuthenticatedTransferirRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/code': typeof AuthCodeRoute
 }
@@ -65,21 +113,55 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authenticated/depositar': typeof AuthenticatedDepositarRoute
+  '/_authenticated/historial': typeof AuthenticatedHistorialRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/retirar': typeof AuthenticatedRetirarRoute
+  '/_authenticated/tarjetas': typeof AuthenticatedTarjetasRoute
+  '/_authenticated/transferir': typeof AuthenticatedTransferirRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/code': typeof AuthCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/home' | '/auth/callback' | '/auth/code'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/depositar'
+    | '/historial'
+    | '/home'
+    | '/perfil'
+    | '/retirar'
+    | '/tarjetas'
+    | '/transferir'
+    | '/auth/callback'
+    | '/auth/code'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/home' | '/auth/callback' | '/auth/code'
+  to:
+    | '/'
+    | '/login'
+    | '/depositar'
+    | '/historial'
+    | '/home'
+    | '/perfil'
+    | '/retirar'
+    | '/tarjetas'
+    | '/transferir'
+    | '/auth/callback'
+    | '/auth/code'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/login'
+    | '/_authenticated/depositar'
+    | '/_authenticated/historial'
     | '/_authenticated/home'
+    | '/_authenticated/perfil'
+    | '/_authenticated/retirar'
+    | '/_authenticated/tarjetas'
+    | '/_authenticated/transferir'
     | '/auth/callback'
     | '/auth/code'
   fileRoutesById: FileRoutesById
@@ -129,6 +211,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/transferir': {
+      id: '/_authenticated/transferir'
+      path: '/transferir'
+      fullPath: '/transferir'
+      preLoaderRoute: typeof AuthenticatedTransferirRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tarjetas': {
+      id: '/_authenticated/tarjetas'
+      path: '/tarjetas'
+      fullPath: '/tarjetas'
+      preLoaderRoute: typeof AuthenticatedTarjetasRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/retirar': {
+      id: '/_authenticated/retirar'
+      path: '/retirar'
+      fullPath: '/retirar'
+      preLoaderRoute: typeof AuthenticatedRetirarRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/perfil': {
+      id: '/_authenticated/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/home': {
       id: '/_authenticated/home'
       path: '/home'
@@ -136,15 +246,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/historial': {
+      id: '/_authenticated/historial'
+      path: '/historial'
+      fullPath: '/historial'
+      preLoaderRoute: typeof AuthenticatedHistorialRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/depositar': {
+      id: '/_authenticated/depositar'
+      path: '/depositar'
+      fullPath: '/depositar'
+      preLoaderRoute: typeof AuthenticatedDepositarRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedDepositarRoute: typeof AuthenticatedDepositarRoute
+  AuthenticatedHistorialRoute: typeof AuthenticatedHistorialRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedRetirarRoute: typeof AuthenticatedRetirarRoute
+  AuthenticatedTarjetasRoute: typeof AuthenticatedTarjetasRoute
+  AuthenticatedTransferirRoute: typeof AuthenticatedTransferirRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedDepositarRoute: AuthenticatedDepositarRoute,
+  AuthenticatedHistorialRoute: AuthenticatedHistorialRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedRetirarRoute: AuthenticatedRetirarRoute,
+  AuthenticatedTarjetasRoute: AuthenticatedTarjetasRoute,
+  AuthenticatedTransferirRoute: AuthenticatedTransferirRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

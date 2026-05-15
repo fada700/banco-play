@@ -413,6 +413,13 @@ export type Database = {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
+      op_depositar: { Args: { _monto: number }; Returns: undefined }
+      op_retirar: { Args: { _monto: number }; Returns: undefined }
+      op_transferir: {
+        Args: { _concepto: string; _destino_numero: string; _monto: number }
+        Returns: Json
+      }
+      toggle_tarjeta_debito: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "trabajador" | "usuario"
