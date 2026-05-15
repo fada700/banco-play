@@ -9,7 +9,7 @@ import {
   discordAvatarUrl,
   sendDM,
 } from "./discord.server";
-import { DISCORD_GUILD_ID, ROLE_ID_ADMIN, ROLE_ID_TRABAJADOR } from "./discord-config";
+import { DISCORD_GUILD_ID, DISCORD_OAUTH_SCOPES, ROLE_ID_ADMIN, ROLE_ID_TRABAJADOR } from "./discord-config";
 
 // Genera un password determinístico por usuario, usando un secreto del servidor.
 async function derivePassword(discordId: string): Promise<string> {
@@ -280,7 +280,7 @@ export const getOAuthUrl = createServerFn({ method: "POST" })
       client_id: clientId,
       redirect_uri: data.redirectUri,
       response_type: "code",
-      scope: "identify guilds.members.read",
+      scope: DISCORD_OAUTH_SCOPES,
       prompt: "consent",
     });
     return { url: `https://discord.com/api/oauth2/authorize?${params}` };
