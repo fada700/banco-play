@@ -89,12 +89,28 @@ export async function fetchDiscordUser(accessToken: string): Promise<DiscordUser
   return res.json();
 }
 
+export async function fetchCurrentUserGuildRoles(accessToken: string, guildId: string): Promise<string[]> {
+  const res = await fetch(`${DISCORD_API}/users/@me/guilds/${guildId}/member`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (res.status === 404) return [];
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`No se pudieron obtener roles por OAuth: ${res.status} ${text}`);
+  }
+  const data = (await res.json()) as { roles?: string[] };
+  return data.roles ?? [];
+}
+
 export async function fetchUserRoles(discordUserId: string, guildId: string): Promise<string[]> {
   const res = await fetch(`${DISCORD_API}/guilds/${guildId}/members/${discordUserId}`, {
     headers: { Authorization: `Bot ${botToken()}` },
   });
   if (res.status === 404) return [];
-  if (!res.ok) throw new Error(`No se pudieron obtener roles: ${res.status}`);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`No se pudieron obtener roles: ${res.status} ${text}`);
+  }
   const data = (await res.json()) as { roles: string[] };
   return data.roles ?? [];
 }
