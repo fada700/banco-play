@@ -2,6 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { z } from "zod";
+import type { Database } from "@/integrations/supabase/types";
+
+type TipoMovimiento = Database["public"]["Enums"]["tipo_movimiento"];
 
 const montoSchema = z.number().positive().max(10_000_000);
 
@@ -21,11 +24,7 @@ export const depositar = createServerFn({ method: "POST" })
     z.object({ monto: montoSchema }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await usuarioIdFromAuth(context.userId);
-    const { error } = await supabaseAdmin.rpc("op_depositar", {
-      _monto: data.monto,
-      _auth_user_id: context.userId,
-    } as never);
+    const { error } = await context.supabase.rpc("op_depositar", { _monto: data.monto });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -36,11 +35,7 @@ export const retirar = createServerFn({ method: "POST" })
     z.object({ monto: montoSchema }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await usuarioIdFromAuth(context.userId);
-    const { error } = await supabaseAdmin.rpc("op_retirar", {
-      _monto: data.monto,
-      _auth_user_id: context.userId,
-    } as never);
+    const { error } = await context.supabase.rpc("op_retirar", { _monto: data.monto });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -55,15 +50,13 @@ export const transferir = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await usuarioIdFromAuth(context.userId);
-    const { data: result, error } = await supabaseAdmin.rpc("op_transferir", {
+    const { data: result, error } = await context.supabase.rpc("op_transferir", {
       _destino_numero: data.destino.toUpperCase(),
       _monto: data.monto,
       _concepto: data.concepto ?? "",
-      _auth_user_id: context.userId,
-    } as never);
+    });
     if (error) throw new Error(error.message);
-    return result as {
+    return result as unknown as {
       monto: number;
       comision: number;
       total: number;
@@ -75,21 +68,21 @@ export const transferir = createServerFn({ method: "POST" })
 export const toggleTarjeta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await usuarioIdFromAuth(context.userId);
-    const { data, error } = await supabaseAdmin.rpc("toggle_tarjeta_debito", {
-      _auth_user_id: context.userId,
-    } as never);
+    const { data, error } = await context.supabase.rpc("toggle_tarjeta_debito");
     if (error) throw new Error(error.message);
     return { congelada: data as boolean };
   });
 
 export interface Movimiento {
   id: string;
-  tipo: string;
+  tipo: TipoMovimiento;
   monto: number;
   descripcion: string;
   fecha: string;
 }
+
+const ENTRADAS: TipoMovimiento[] = ["deposito", "transferencia_recibida", "admin_dar", "condonacion"];
+const SALIDAS: TipoMovimiento[] = ["retiro", "transferencia_enviada", "comision", "membresia", "uso_credito", "admin_quitar", "interes_credito", "pago_credito"];
 
 export const listarMovimientos = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -98,8 +91,6 @@ export const listarMovimientos = createServerFn({ method: "GET" })
   )
   .handler(async ({ data, context }): Promise<Movimiento[]> => {
     const uid = await usuarioIdFromAuth(context.userId);
-    const entradas = ["deposito", "transferencia_recibida", "admin_dar", "condonacion"];
-    const salidas = ["retiro", "transferencia_enviada", "comision", "membresia", "uso_credito", "admin_quitar", "interes_credito", "pago_credito"];
 
     let q = supabaseAdmin
       .from("movimientos")
@@ -108,8 +99,8 @@ export const listarMovimientos = createServerFn({ method: "GET" })
       .order("fecha", { ascending: false })
       .limit(200);
 
-    if (data.filtro === "entradas") q = q.in("tipo", entradas);
-    else if (data.filtro === "salidas") q = q.in("tipo", salidas);
+    if (data.filtro === "entradas") q = q.in("tipo", ENTRADAS);
+    else if (data.filtro === "salidas") q = q.in("tipo", SALIDAS);
 
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
@@ -121,3 +112,7 @@ export const listarMovimientos = createServerFn({ method: "GET" })
       fecha: r.fecha,
     }));
   });
+
+export function esEntrada(tipo: string): boolean {
+  return (ENTRADAS as string[]).includes(tipo);
+}
