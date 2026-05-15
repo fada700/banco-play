@@ -200,4 +200,81 @@ export const startLogin = createServerFn({ method: "POST" })
     };
   });
 
-export const verifyCode = cr
+export const verifyCode = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      sessionId: z.string().uuid(),
+      discordId: z.string().min(1).max(40),
+      codigo: z.string().regex(/^\d{4}$/),
+    }).parse,
+  )
+  .handler(async ({ data }) => {
+    const { data: row } = await supabaseAdmin
+      .from("login_codigos")
+      .select("id, codigo_hash, intentos, expira_en, usado")
+      .eq("id", data.sessionId)
+      .eq("discord_id", data.discordId)
+      .maybeSingle();
+
+    if (!row) throw new Error("Sesión inválida");
+    if (row.usado) throw new Error("Código ya usado");
+    if (new Date(row.expira_en) < new Date()) throw new Error("Código expirado");
+
+    const hash = await sha256(data.codigo);
+    if (hash !== row.codigo_hash) {
+      const intentos = row.intentos + 1;
+      await supabaseAdmin.from("login_codigos").update({ intentos }).eq("id", row.id);
+
+      const { data: u } = await supabaseAdmin
+        .from("usuarios")
+        .select("id, intentos_fallidos")
+        .eq("discord_id", data.discordId)
+        .single();
+      const total = (u?.intentos_fallidos ?? 0) + 1;
+      if (total >= 3) {
+        await supabaseAdmin
+          .from("usuarios")
+          .update({
+            intentos_fallidos: 0,
+            bloqueado_hasta: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+          })
+          .eq("id", u!.id);
+        await supabaseAdmin.from("login_codigos").update({ usado: true }).eq("id", row.id);
+        throw new Error("3 intentos fallidos. Cuenta bloqueada 5 minutos.");
+      } else {
+        await supabaseAdmin.from("usuarios").update({ intentos_fallidos: total }).eq("id", u!.id);
+        throw new Error(`Código incorrecto. Intentos restantes: ${3 - total}`);
+      }
+    }
+
+    await supabaseAdmin.from("login_codigos").update({ usado: true }).eq("id", row.id);
+    await supabaseAdmin
+      .from("usuarios")
+      .update({ intentos_fallidos: 0, bloqueado_hasta: null })
+      .eq("discord_id", data.discordId);
+
+    const password = await derivePassword(data.discordId);
+    return { email: userEmail(data.discordId), password };
+  });
+
+export const getOAuthUrl = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ redirectUri: z.string().url() }).parse)
+  .handler(async ({ data }) => {
+    const clientId = process.env.DISCORD_CLIENT_ID;
+    if (!clientId) throw new Error("DISCORD_CLIENT_ID no configurado");
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: data.redirectUri,
+      response_type: "code",
+      scope: DISCORD_OAUTH_SCOPES,
+      prompt: "consent",
+    });
+    return { url: `https://discord.com/api/oauth2/authorize?${params}` };
+  });
+
+async function sha256(s: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
