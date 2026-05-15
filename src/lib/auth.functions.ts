@@ -257,6 +257,21 @@ export const verifyCode = createServerFn({ method: "POST" })
     return { email: userEmail(data.discordId), password };
   });
 
+export const getOAuthUrl = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ redirectUri: z.string().url() }).parse)
+  .handler(async ({ data }) => {
+    const clientId = process.env.DISCORD_CLIENT_ID;
+    if (!clientId) throw new Error("DISCORD_CLIENT_ID no configurado");
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: data.redirectUri,
+      response_type: "code",
+      scope: "identify",
+      prompt: "consent",
+    });
+    return { url: `https://discord.com/api/oauth2/authorize?${params}` };
+  });
+
 async function sha256(s: string): Promise<string> {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
   return Array.from(new Uint8Array(buf))
