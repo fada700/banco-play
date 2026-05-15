@@ -5,6 +5,7 @@ import {
   exchangeOAuthCode,
   fetchDiscordUser,
   fetchUserRoles,
+  fetchCurrentUserGuildRoles,
   discordAvatarUrl,
   sendDM,
 } from "./discord.server";
@@ -98,8 +99,21 @@ async function ensureUsuario(discord: {
   return { usuario_id: nuevoUsuario.id, auth_user_id: nuevoUsuario.auth_user_id! };
 }
 
-async function syncRoles(usuarioId: string, discordUserId: string): Promise<void> {
-  const roles = await fetchUserRoles(discordUserId, DISCORD_GUILD_ID);
+async function syncRoles(usuarioId: string, discordUserId: string, accessToken: string): Promise<void> {
+  let roles: string[] = [];
+
+  try {
+    roles = await fetchCurrentUserGuildRoles(accessToken, DISCORD_GUILD_ID);
+  } catch (oauthError) {
+    console.warn("Discord OAuth role sync fallback:", oauthError);
+    try {
+      roles = await fetchUserRoles(discordUserId, DISCORD_GUILD_ID);
+    } catch (botError) {
+      console.error("Discord role sync failed:", botError);
+      return;
+    }
+  }
+
   const isAdmin = roles.includes(ROLE_ID_ADMIN);
   const isTrabajador = roles.includes(ROLE_ID_TRABAJADOR);
 
@@ -135,7 +149,7 @@ export const startLogin = createServerFn({ method: "POST" })
     const discord = await fetchDiscordUser(tokens.access_token);
 
     const { usuario_id } = await ensureUsuario(discord);
-    await syncRoles(usuario_id, discord.id);
+    await syncRoles(usuario_id, discord.id, tokens.access_token);
 
     // Verificar bloqueo
     const { data: user } = await supabaseAdmin
@@ -266,7 +280,7 @@ export const getOAuthUrl = createServerFn({ method: "POST" })
       client_id: clientId,
       redirect_uri: data.redirectUri,
       response_type: "code",
-      scope: "identify",
+      scope: "identify guilds.members.read",
       prompt: "consent",
     });
     return { url: `https://discord.com/api/oauth2/authorize?${params}` };
