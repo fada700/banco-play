@@ -15,12 +15,15 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthCodeRouteImport } from './routes/auth/code'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthenticatedTransferirRouteImport } from './routes/_authenticated/transferir'
+import { Route as AuthenticatedTrabajadorRouteImport } from './routes/_authenticated/trabajador'
 import { Route as AuthenticatedTarjetasRouteImport } from './routes/_authenticated/tarjetas'
 import { Route as AuthenticatedRetirarRouteImport } from './routes/_authenticated/retirar'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedHistorialRouteImport } from './routes/_authenticated/historial'
 import { Route as AuthenticatedDepositarRouteImport } from './routes/_authenticated/depositar'
+import { Route as AuthenticatedCreditoRouteImport } from './routes/_authenticated/credito'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -49,6 +52,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
 const AuthenticatedTransferirRoute = AuthenticatedTransferirRouteImport.update({
   id: '/transferir',
   path: '/transferir',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTrabajadorRoute = AuthenticatedTrabajadorRouteImport.update({
+  id: '/trabajador',
+  path: '/trabajador',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedTarjetasRoute = AuthenticatedTarjetasRouteImport.update({
@@ -81,16 +89,29 @@ const AuthenticatedDepositarRoute = AuthenticatedDepositarRouteImport.update({
   path: '/depositar',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedCreditoRoute = AuthenticatedCreditoRouteImport.update({
+  id: '/credito',
+  path: '/credito',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/credito': typeof AuthenticatedCreditoRoute
   '/depositar': typeof AuthenticatedDepositarRoute
   '/historial': typeof AuthenticatedHistorialRoute
   '/home': typeof AuthenticatedHomeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/retirar': typeof AuthenticatedRetirarRoute
   '/tarjetas': typeof AuthenticatedTarjetasRoute
+  '/trabajador': typeof AuthenticatedTrabajadorRoute
   '/transferir': typeof AuthenticatedTransferirRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/code': typeof AuthCodeRoute
@@ -98,12 +119,15 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/credito': typeof AuthenticatedCreditoRoute
   '/depositar': typeof AuthenticatedDepositarRoute
   '/historial': typeof AuthenticatedHistorialRoute
   '/home': typeof AuthenticatedHomeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/retirar': typeof AuthenticatedRetirarRoute
   '/tarjetas': typeof AuthenticatedTarjetasRoute
+  '/trabajador': typeof AuthenticatedTrabajadorRoute
   '/transferir': typeof AuthenticatedTransferirRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/code': typeof AuthCodeRoute
@@ -113,12 +137,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/credito': typeof AuthenticatedCreditoRoute
   '/_authenticated/depositar': typeof AuthenticatedDepositarRoute
   '/_authenticated/historial': typeof AuthenticatedHistorialRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/retirar': typeof AuthenticatedRetirarRoute
   '/_authenticated/tarjetas': typeof AuthenticatedTarjetasRoute
+  '/_authenticated/trabajador': typeof AuthenticatedTrabajadorRoute
   '/_authenticated/transferir': typeof AuthenticatedTransferirRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/code': typeof AuthCodeRoute
@@ -128,12 +155,15 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/admin'
+    | '/credito'
     | '/depositar'
     | '/historial'
     | '/home'
     | '/perfil'
     | '/retirar'
     | '/tarjetas'
+    | '/trabajador'
     | '/transferir'
     | '/auth/callback'
     | '/auth/code'
@@ -141,12 +171,15 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/admin'
+    | '/credito'
     | '/depositar'
     | '/historial'
     | '/home'
     | '/perfil'
     | '/retirar'
     | '/tarjetas'
+    | '/trabajador'
     | '/transferir'
     | '/auth/callback'
     | '/auth/code'
@@ -155,12 +188,15 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/login'
+    | '/_authenticated/admin'
+    | '/_authenticated/credito'
     | '/_authenticated/depositar'
     | '/_authenticated/historial'
     | '/_authenticated/home'
     | '/_authenticated/perfil'
     | '/_authenticated/retirar'
     | '/_authenticated/tarjetas'
+    | '/_authenticated/trabajador'
     | '/_authenticated/transferir'
     | '/auth/callback'
     | '/auth/code'
@@ -218,6 +254,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTransferirRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/trabajador': {
+      id: '/_authenticated/trabajador'
+      path: '/trabajador'
+      fullPath: '/trabajador'
+      preLoaderRoute: typeof AuthenticatedTrabajadorRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/tarjetas': {
       id: '/_authenticated/tarjetas'
       path: '/tarjetas'
@@ -260,26 +303,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDepositarRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/credito': {
+      id: '/_authenticated/credito'
+      path: '/credito'
+      fullPath: '/credito'
+      preLoaderRoute: typeof AuthenticatedCreditoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedCreditoRoute: typeof AuthenticatedCreditoRoute
   AuthenticatedDepositarRoute: typeof AuthenticatedDepositarRoute
   AuthenticatedHistorialRoute: typeof AuthenticatedHistorialRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedRetirarRoute: typeof AuthenticatedRetirarRoute
   AuthenticatedTarjetasRoute: typeof AuthenticatedTarjetasRoute
+  AuthenticatedTrabajadorRoute: typeof AuthenticatedTrabajadorRoute
   AuthenticatedTransferirRoute: typeof AuthenticatedTransferirRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedCreditoRoute: AuthenticatedCreditoRoute,
   AuthenticatedDepositarRoute: AuthenticatedDepositarRoute,
   AuthenticatedHistorialRoute: AuthenticatedHistorialRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedRetirarRoute: AuthenticatedRetirarRoute,
   AuthenticatedTarjetasRoute: AuthenticatedTarjetasRoute,
+  AuthenticatedTrabajadorRoute: AuthenticatedTrabajadorRoute,
   AuthenticatedTransferirRoute: AuthenticatedTransferirRoute,
 }
 
