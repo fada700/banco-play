@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthLayout() {
   const loc = useLocation();
-  const hideNav = ["/transferir", "/depositar", "/retirar", "/credito", "/admin", "/trabajador"].some((p) =>
+  const hideNav = ["/transferir", "/depositar", "/retirar"].some((p) =>
     loc.pathname.startsWith(p),
   );
 
