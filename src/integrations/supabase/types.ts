@@ -407,7 +407,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_ajustar_saldo: {
+        Args: {
+          _cuenta: string
+          _delta: number
+          _motivo: string
+          _usuario_id: string
+        }
+        Returns: undefined
+      }
+      ajustar_limite_credito: {
+        Args: { _nuevo_limite: number; _usuario_id: string }
+        Returns: undefined
+      }
+      aprobar_tarjeta_credito: {
+        Args: { _solicitud_id: string }
+        Returns: undefined
+      }
+      condonar_deuda: { Args: { _usuario_id: string }; Returns: undefined }
       current_usuario_id: { Args: never; Returns: string }
+      dueno_usuario_id: { Args: never; Returns: string }
       generar_numero_cliente: { Args: never; Returns: string }
       has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
@@ -419,7 +438,19 @@ export type Database = {
         Args: { _concepto: string; _destino_numero: string; _monto: number }
         Returns: Json
       }
+      pagar_credito: { Args: { _monto: number }; Returns: Json }
+      rechazar_tarjeta_credito: {
+        Args: { _solicitud_id: string }
+        Returns: undefined
+      }
+      registrar_ganancia: {
+        Args: { _concepto: string; _monto: number; _usuario: string }
+        Returns: undefined
+      }
+      set_dueno_banco: { Args: { _discord_id: string }; Returns: undefined }
+      solicitar_tarjeta_credito: { Args: never; Returns: string }
       toggle_tarjeta_debito: { Args: never; Returns: boolean }
+      usar_credito: { Args: { _monto: number }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "trabajador" | "usuario"
