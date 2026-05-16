@@ -108,12 +108,11 @@ function TarjetasPage() {
 
       <section className="container-app mt-8">
         <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-2">Crédito</div>
-        <div className="rounded-2xl border border-dashed border-border p-8 text-center">
-          <div className="text-sm font-medium">Aún no tienes tarjeta de crédito</div>
-          <div className="text-xs text-muted-foreground mt-1">
-            Próximamente podrás solicitarla desde aquí.
-          </div>
-        </div>
+        <Link to="/credito" className="block rounded-2xl border border-dashed border-border p-6 text-center bmx-tap">
+          <div className="text-sm font-medium">Tarjeta de crédito</div>
+          <div className="text-xs text-muted-foreground mt-1">Solicítala, úsala y págala desde aquí.</div>
+          <div className="text-xs text-foreground/80 underline mt-3">Abrir →</div>
+        </Link>
       </section>
 
       {data && (
