@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getMe } from "@/lib/usuario.functions";
@@ -63,6 +63,19 @@ function PerfilPage() {
         <Row k="Saldo banco" v={formatMXN(data.saldo_banco)} mono />
         <Row k="Saldo cartera" v={formatMXN(data.saldo_cartera)} mono />
       </section>
+
+      {(data.roles.includes("admin") || data.roles.includes("trabajador")) && (
+        <section className="container-app mt-6 space-y-2">
+          <Link to="/trabajador" className="bmx-tap block w-full rounded-2xl border border-border bg-surface py-4 text-sm font-semibold text-center">
+            Panel trabajador
+          </Link>
+          {data.roles.includes("admin") && (
+            <Link to="/admin" className="bmx-tap block w-full rounded-2xl border border-border bg-surface py-4 text-sm font-semibold text-center">
+              Panel admin
+            </Link>
+          )}
+        </section>
+      )}
 
       <section className="container-app mt-6">
         <button
