@@ -163,9 +163,14 @@ export const buscarUsuarios = createServerFn({ method: "GET" })
     }
     const { data: rows, error } = await query;
     if (error) throw new Error(error.message);
-    return (rows ?? []).map((r) => ({
-      id: r.id, nombre: r.nombre, numero_cliente: r.numero_cliente, discord_id: r.discord_id,
-      saldo_banco: Number(r.saldo_banco), saldo_cartera: Number(r.saldo_cartera), membresia: r.membresia,
+    return (rows ?? []).map((r: any) => ({
+      id: r.id as string,
+      nombre: r.nombre as string,
+      numero_cliente: r.numero_cliente as string,
+      discord_id: r.discord_id as string,
+      saldo_banco: Number(r.saldo_banco),
+      saldo_cartera: Number(r.saldo_cartera),
+      membresia: r.membresia as string,
     }));
   });
 
@@ -174,7 +179,7 @@ export const adminAjustarSaldo = createServerFn({ method: "POST" })
   .inputValidator((d: { usuario_id: string; delta: number; cuenta: "banco" | "cartera"; motivo?: string }) =>
     z.object({
       usuario_id: z.string().uuid(),
-      delta: z.number().refine((n) => n !== 0).min(-10_000_000).max(10_000_000),
+      delta: z.number().min(-10_000_000).max(10_000_000).refine((n) => n !== 0, "Monto inválido"),
       cuenta: z.enum(["banco", "cartera"]),
       motivo: z.string().max(120).optional(),
     }).parse(d),
