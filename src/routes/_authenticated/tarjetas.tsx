@@ -48,60 +48,24 @@ function TarjetasPage() {
         {isLoading || !card ? (
           <div className="rounded-2xl bg-surface aspect-[1.6/1] bmx-pulse" />
         ) : (
-          <div className="flip-perspective">
-            <div
-              className={`flip-inner ${flipped ? "flipped" : ""} cursor-pointer`}
-              onClick={() => setFlipped((v) => !v)}
-            >
-              <div className="flip-face bg-card-debit text-card-debit-foreground rounded-2xl p-5 aspect-[1.6/1] flex flex-col justify-between shadow-lg">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="text-xs uppercase tracking-widest opacity-70">Débito</div>
-                    <div className="text-sm font-semibold mt-1">Banco De México</div>
-                  </div>
-                  {card.congelada && (
-                    <div className="text-[10px] uppercase tracking-widest bg-white/15 px-2 py-1 rounded-full">
-                      Congelada
-                    </div>
-                  )}
-                </div>
-                <div className="font-mono text-lg tracking-widest">{maskCardNumber(card.numero)}</div>
-                <div className="flex justify-between items-end text-xs">
-                  <div>
-                    <div className="opacity-50 uppercase">Titular</div>
-                    <div className="font-medium uppercase">{data?.nombre}</div>
-                  </div>
-                  <div>
-                    <div className="opacity-50 uppercase">Vence</div>
-                    <div className="font-mono">{card.vencimiento}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="flip-face flip-face-back bg-card-debit text-card-debit-foreground rounded-2xl p-5 aspect-[1.6/1] flex flex-col justify-between shadow-lg">
-                <div className="h-10 -mx-5 bg-black/60 mt-3" />
-                <div className="bg-white/90 text-black rounded px-3 py-2 font-mono text-lg w-32 self-end">
-                  {card.cvv}
-                </div>
-                <div className="text-[10px] opacity-60 uppercase tracking-widest">CVV — Toca para voltear</div>
-              </div>
-            </div>
-          </div>
+          <DebitCard
+            numero={card.numero}
+            cvv={card.cvv}
+            vencimiento={card.vencimiento}
+            titular={data?.nombre ?? ""}
+            congelada={card.congelada}
+            membresia={data?.membresia ?? "basica"}
+          />
         )}
 
         {card && (
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="mt-4">
             <button
               onClick={onToggle}
               disabled={busy}
-              className="bmx-tap rounded-2xl border border-border py-3 text-sm font-medium disabled:opacity-50"
+              className="bmx-tap w-full rounded-2xl border border-border py-3 text-sm font-medium disabled:opacity-50"
             >
-              {card.congelada ? "Descongelar" : "Congelar"}
-            </button>
-            <button
-              onClick={() => setFlipped((v) => !v)}
-              className="bmx-tap rounded-2xl border border-border py-3 text-sm font-medium"
-            >
-              Ver CVV
+              {card.congelada ? "Descongelar tarjeta" : "Congelar tarjeta"}
             </button>
           </div>
         )}

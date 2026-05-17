@@ -4,7 +4,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { getCredito, solicitarCredito, usarCredito, pagarCredito } from "@/lib/credito.functions";
-import { formatMXN, maskCardNumber } from "@/lib/format";
+import { getMe } from "@/lib/usuario.functions";
+import { formatMXN } from "@/lib/format";
+import { CreditCard } from "@/components/CreditCard";
 
 export const Route = createFileRoute("/_authenticated/credito")({
   component: CreditoPage,
