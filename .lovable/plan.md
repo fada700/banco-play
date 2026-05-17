@@ -1,61 +1,101 @@
-# Plan: Banco De Mexico PWA
+# Fase 4 — Paneles staff reforzados + mejoras UX
 
-Proyecto extenso. Lo dividiré en fases entregables. Antes de empezar necesito confirmar algunos puntos clave porque condicionan toda la arquitectura.
+## 1. Rutas y flujo de login para staff
 
-## Preguntas bloqueantes
+Nuevas rutas públicas (fuera de `_authenticated`):
 
-1. **Bot de Discord**: ¿Tienes ya un bot creado con token? El bot es necesario para:
-   - Enviar el código de 4 dígitos al DM (login 2FA)
-   - Enviar DMs de confirmación de cada operación
-   - Verificar roles de trabajador/admin
-   
-   Necesitaré: `DISCORD_BOT_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_GUILD_ID`, `ROLE_ID_TRABAJADOR`, `ROLE_ID_ADMIN`.
+- `/admin-login` — pantalla dedicada "Acceso administradores"
+- `/trabajador-login` — pantalla dedicada "Acceso trabajadores"
 
-2. **Discord OAuth redirect**: Usaré la URL del preview de Lovable. ¿OK?
+Cada una:
+- Botón "Continuar con Discord" (mismo OAuth que login normal, pero con `state` que marca el rol esperado).
+- Tras el callback, se valida el rol del usuario (admin / trabajador). Si NO tiene el rol → mensaje "No tienes acceso" + botón cerrar sesión, sin redirigir al home.
+- Si sí lo tiene → redirige a `/admin` o `/trabajador-panel`.
 
-3. **Cron jobs**: Los intereses diarios del 5%, recordatorios de pago, bloqueo de tarjeta el día 9, y cobros de membresía mensuales requieren tareas programadas. Usaré `pg_cron` de Supabase.
+Cambios de URL:
+- `/trabajador` → renombrar a `/trabajador-panel` (más explícito como pediste).
+- `/admin` se queda igual.
 
-## Arquitectura
+Guard reforzado en `_authenticated/admin.tsx` y `_authenticated/trabajador-panel.tsx`:
+- Si no autenticado → `redirect → /admin-login` o `/trabajador-login` (no al `/login` general).
+- Si autenticado pero sin rol → pantalla "Sin acceso" con botón "Cerrar sesión y volver".
 
-- **Frontend**: TanStack Start, mobile-first, Tailwind con tokens en `oklch`, fuentes Outfit + JetBrains Mono, manifest PWA (sin service worker para evitar problemas de cache).
-- **Backend**: Lovable Cloud (Supabase). Server functions de TanStack para toda la lógica (auth, transacciones, bot DMs).
-- **Auth**: Discord OAuth2 → genera código 4 dígitos → bot lo manda por DM → usuario lo ingresa → sesión Supabase. Bloqueo 5 min tras 3 fallos.
-- **Roles**: detectados al login leyendo roles del usuario en el guild → redirige a `/`, `/trabajadores` o `/admin`.
+## 2. Bloqueo de PWA en paneles staff
 
-## Fases de entrega
+En `_authenticated/admin.tsx` y `_authenticated/trabajador-panel.tsx`, hook que detecta:
+```ts
+window.matchMedia('(display-mode: standalone)').matches
+  || (navigator as any).standalone === true
+```
+Si es true → pantalla "Por seguridad, el panel de staff no funciona en la app instalada. Ábrelo en navegador (móvil o PC): banco-play.lovable.app/admin".
 
-### Fase 1 — Fundación (esta entrega)
-- Design system completo (paleta, fuentes, tokens)
-- Manifest PWA + íconos + splash
-- Schema Supabase completo (8 tablas + RLS + triggers)
-- Pantalla splash + login Discord OAuth + pantalla de código 4 dígitos con teclado
-- Edge logic: generar código, mandar DM vía bot, validar, bloqueo 5 min
-- Home de usuario: header, saludo, cards Cartera/Banco con ojito, tarjeta débito con flip CVV, 3 botones acción, últimos 5 movimientos
-- Generación automática de tarjeta de débito al crear cuenta
+Aplica solo a estas dos rutas; el resto de la app sigue funcionando como PWA.
 
-### Fase 2 — Operaciones
-- Depositar / Retirar / Transferir (con búsqueda destinatario, comisión 1.5%, NIP, animación éxito, DMs bot)
-- Historial completo con filtros
-- Perfil (cambiar NIP, cerrar sesión)
+## 3. CVV obligatorio en montos grandes (>$35,000)
 
-### Fase 3 — Crédito y Membresías
-- Solicitar tarjeta crédito, niveles, score
-- Membresías Plus/Black con cobro automático
-- Cron: recordatorios día 1-5, interés 5% día 6+, bloqueo día 9, cobro auto
-- Acreditación de ganancias al dueño + DM
+En `/transferir` y `/retirar`:
+- Si `monto > 35000`, antes de confirmar pedir CVV de la tarjeta de débito.
+- Nueva server fn `verificarCvv(cvv)` que compara con `tarjetas_debito.cvv` del usuario (usando `current_usuario_id()`).
+- Si falla → error "CVV incorrecto", bloquea operación.
+- Si éxito → continúa con la transferencia/retiro normal.
 
-### Fase 4 — Paneles
-- Panel Trabajadores: aprobar tarjetas, ver deudores, subir/bajar límite, condonar deuda
-- Panel Admin: buscador, dar/quitar dinero, dashboard ganancias (día/semana/mes), config dueño
+UI: modal compacto con NumPad de 3 dígitos.
+
+## 4. Solicitudes de tarjeta de crédito → panel trabajador
+
+Ya existe `solicitar_tarjeta_credito` insertando en `solicitudes`, y `listarSolicitudes` ya las muestra. Verificar que el flujo desde `/credito` realmente cree la solicitud con `tipo='tarjeta_credito'` y aparezca en `/trabajador-panel`. Si falta, se ajusta.
+
+## 5. UI tarjetas (débito y crédito) más viva
+
+Las tarjetas actuales usan gradientes muy sutiles sobre `bg-surface`. Se rehacen como tarjetas reales tipo Banorte (basado en las referencias que mandaste):
+
+- **Débito básica**: rojo intenso con patrón geométrico sutil, logo "PlayBank", chip dorado, contactless, número formateado, marca "VISA Platinum" abajo.
+- **Débito Plus**: negro con franja tricolor (verde/blanco/rojo) tipo edición selección mexicana.
+- **Débito Black**: negro mate con detalles dorados.
+- **Crédito**: gris platino con gradiente metálico, chip + contactless prominentes.
+
+Archivos que se tocan para esto (también te los dejo listados para que puedas ajustar tú):
+- `src/components/CreditCard.tsx` (nuevo) — tarjeta de crédito
+- `src/components/DebitCard.tsx` (nuevo) — tarjeta de débito con variant por membresía
+- `src/routes/_authenticated/tarjetas.tsx` — usa `DebitCard`
+- `src/routes/_authenticated/credito.tsx` — usa `CreditCard`
+- `src/styles.css` — añadir tokens `--card-red`, `--card-gold`, `--card-platinum`, gradientes
+
+## 6. Rendimiento
+
+- `staleTime: 30s` en queries de panel staff (`buscar`, `ganancias`, `sols`, `deudores`) para evitar refetch en cada navegación.
+- Lazy load de `/admin` y `/trabajador-panel` (TanStack ya code-splittea por ruta automáticamente, verificar que no haya imports innecesarios).
+- Quitar `enabled: !!isAdmin` dependiente de `me` por `enabled: me?.roles.includes('admin')` para no disparar queries antes.
 
 ## Detalles técnicos
 
-- Tokens de color en `oklch` en `src/styles.css`; clases semánticas (`bg-card-debit`, `text-money-in`, etc.)
-- NIP: hash con bcrypt (server-side)
-- Número de tarjeta/CVV: generados aleatorios, guardados encriptados
-- Comisión 1.5% y todos los intereses → `INSERT` en `ganancias_banco` + `UPDATE` saldo_banco del dueño (leído de tabla `config`)
-- Bot DMs: helper `sendDiscordDM(userId, embed)` server-side llamando `https://discord.com/api/v10/users/@me/channels` + `/channels/{id}/messages`
+- El bloqueo PWA es solo client-side (UX), no es seguridad real — la seguridad real sigue siendo el rol en DB validado server-side en cada `assertStaff`.
+- CVV se verifica server-side comparando texto plano (como ya está guardado en `tarjetas_debito.cvv`). No se loguea.
+- Rate limit de intentos CVV: máx 3 por sesión, luego bloquea la operación 5 min (estado en memoria del cliente, suficiente para UX; el server function valida en cada llamada).
 
-## Confirmación
+## Archivos a crear/editar
 
-¿Procedo con la **Fase 1** una vez me confirmes el bot de Discord y me proporciones los secrets? Si no tienes el bot aún, te guío paso a paso para crearlo en el Discord Developer Portal antes de empezar.
+Crear:
+- `src/routes/admin-login.tsx`
+- `src/routes/trabajador-login.tsx`
+- `src/routes/_authenticated/trabajador-panel.tsx` (mueve trabajador.tsx)
+- `src/components/CreditCard.tsx`
+- `src/components/DebitCard.tsx`
+- `src/components/CvvDialog.tsx`
+- `src/hooks/use-is-pwa.ts`
+
+Editar:
+- `src/routes/_authenticated/admin.tsx` (guard PWA + login dedicado + sin-acceso)
+- `src/routes/_authenticated/transferir.tsx` (CVV >35k)
+- `src/routes/_authenticated/retirar.tsx` (CVV >35k)
+- `src/routes/_authenticated/tarjetas.tsx` (usar DebitCard)
+- `src/routes/_authenticated/credito.tsx` (usar CreditCard)
+- `src/routes/_authenticated/perfil.tsx` (links a `/admin-login` y `/trabajador-login` cuando no esté logeado como staff; a paneles directos si sí)
+- `src/routes/_authenticated.tsx` (ocultar navbar también en `/trabajador-panel`)
+- `src/lib/auth.functions.ts` (server fn `verificarCvv`)
+- `src/styles.css` (tokens de color para tarjetas)
+- Eliminar `src/routes/_authenticated/trabajador.tsx` (movido)
+
+Migración mínima: ninguna nueva si `solicitar_tarjeta_credito` ya inserta en `solicitudes`. Verifico antes de cerrar la fase.
+
+¿Apruebas? Una vez confirmes empiezo con todo de una.

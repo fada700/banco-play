@@ -3,15 +3,24 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useIsPwa } from "@/hooks/use-is-pwa";
 import { getMe } from "@/lib/usuario.functions";
 import { buscarUsuarios, adminAjustarSaldo, getGanancias, setDueno } from "@/lib/staff.functions";
 import { formatMXN } from "@/lib/format";
+import { PwaBlocked, NoAccess } from "./trabajador-panel";
 
 export const Route = createFileRoute("/_authenticated/admin")({
+  beforeLoad: async () => {
+    if (typeof window === "undefined") return;
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw redirect({ to: "/admin-login" });
+  },
   component: AdminPage,
 });
 
 function AdminPage() {
+  const isPwa = useIsPwa();
   const qc = useQueryClient();
   const fetchMe = useServerFn(getMe);
   const fnBuscar = useServerFn(buscarUsuarios);
@@ -19,16 +28,23 @@ function AdminPage() {
   const fnGan = useServerFn(getGanancias);
   const fnDueno = useServerFn(setDueno);
 
-  const { data: me } = useQuery({ queryKey: ["me"], queryFn: () => fetchMe() });
-  const isAdmin = me?.roles.includes("admin");
+  const { data: me, isLoading: meLoading } = useQuery({
+    queryKey: ["me"], queryFn: () => fetchMe(), staleTime: 60_000,
+  });
+  const isAdmin = !!me?.roles.includes("admin");
 
   const [q, setQ] = useState("");
   const { data: users } = useQuery({
     queryKey: ["buscar", q],
     queryFn: () => fnBuscar({ data: { q } }),
-    enabled: !!isAdmin,
+    enabled: isAdmin && isPwa === false,
+    staleTime: 30_000,
   });
-  const { data: gan } = useQuery({ queryKey: ["ganancias"], queryFn: () => fnGan(), enabled: !!isAdmin });
+  const { data: gan } = useQuery({
+    queryKey: ["ganancias"], queryFn: () => fnGan(),
+    enabled: isAdmin && isPwa === false,
+    staleTime: 30_000,
+  });
 
   const [duenoInput, setDuenoInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -37,8 +53,6 @@ function AdminPage() {
   const [cuenta, setCuenta] = useState<"banco" | "cartera">("banco");
   const [signo, setSigno] = useState<1 | -1>(1);
   const [motivo, setMotivo] = useState("");
-
-  if (me && !isAdmin) throw redirect({ to: "/home" });
 
   const run = async (fn: () => Promise<unknown>, ok: string) => {
     if (busy) return; setBusy(true);
@@ -50,6 +64,12 @@ function AdminPage() {
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   };
 
+  if (isPwa === null || meLoading) {
+    return <div className="min-h-screen flex items-center justify-center text-muted-foreground bmx-pulse">Cargando…</div>;
+  }
+  if (isPwa) return <PwaBlocked path="/admin" />;
+  if (!isAdmin) return <NoAccess />;
+
   return (
     <div className="min-h-screen pb-12">
       <header className="container-app pt-6 flex items-center justify-between">
@@ -57,7 +77,10 @@ function AdminPage() {
           <h1 className="text-2xl font-bold">Panel admin</h1>
           <p className="text-sm text-muted-foreground">Control total</p>
         </div>
-        <Link to="/trabajador" className="text-xs text-muted-foreground underline">Trabajador</Link>
+        <div className="flex items-center gap-3">
+          <Link to="/trabajador-panel" className="text-xs text-muted-foreground underline">Trabajador</Link>
+          <Link to="/home" className="text-xs text-muted-foreground underline">Salir</Link>
+        </div>
       </header>
 
       <section className="container-app mt-6 grid grid-cols-2 gap-3">
