@@ -17,7 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthCodeRouteImport } from './routes/auth/code'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthenticatedTransferirRouteImport } from './routes/_authenticated/transferir'
-import { Route as AuthenticatedTrabajadorRouteImport } from './routes/_authenticated/trabajador'
+import { Route as AuthenticatedTrabajadorPanelRouteImport } from './routes/_authenticated/trabajador-panel'
 import { Route as AuthenticatedTarjetasRouteImport } from './routes/_authenticated/tarjetas'
 import { Route as AuthenticatedRetirarRouteImport } from './routes/_authenticated/retirar'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
@@ -66,11 +66,12 @@ const AuthenticatedTransferirRoute = AuthenticatedTransferirRouteImport.update({
   path: '/transferir',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedTrabajadorRoute = AuthenticatedTrabajadorRouteImport.update({
-  id: '/trabajador',
-  path: '/trabajador',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
+const AuthenticatedTrabajadorPanelRoute =
+  AuthenticatedTrabajadorPanelRouteImport.update({
+    id: '/trabajador-panel',
+    path: '/trabajador-panel',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedTarjetasRoute = AuthenticatedTarjetasRouteImport.update({
   id: '/tarjetas',
   path: '/tarjetas',
@@ -125,7 +126,7 @@ export interface FileRoutesByFullPath {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/retirar': typeof AuthenticatedRetirarRoute
   '/tarjetas': typeof AuthenticatedTarjetasRoute
-  '/trabajador': typeof AuthenticatedTrabajadorRoute
+  '/trabajador-panel': typeof AuthenticatedTrabajadorPanelRoute
   '/transferir': typeof AuthenticatedTransferirRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/code': typeof AuthCodeRoute
@@ -143,7 +144,7 @@ export interface FileRoutesByTo {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/retirar': typeof AuthenticatedRetirarRoute
   '/tarjetas': typeof AuthenticatedTarjetasRoute
-  '/trabajador': typeof AuthenticatedTrabajadorRoute
+  '/trabajador-panel': typeof AuthenticatedTrabajadorPanelRoute
   '/transferir': typeof AuthenticatedTransferirRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/code': typeof AuthCodeRoute
@@ -163,7 +164,7 @@ export interface FileRoutesById {
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/retirar': typeof AuthenticatedRetirarRoute
   '/_authenticated/tarjetas': typeof AuthenticatedTarjetasRoute
-  '/_authenticated/trabajador': typeof AuthenticatedTrabajadorRoute
+  '/_authenticated/trabajador-panel': typeof AuthenticatedTrabajadorPanelRoute
   '/_authenticated/transferir': typeof AuthenticatedTransferirRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/code': typeof AuthCodeRoute
@@ -183,7 +184,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/retirar'
     | '/tarjetas'
-    | '/trabajador'
+    | '/trabajador-panel'
     | '/transferir'
     | '/auth/callback'
     | '/auth/code'
@@ -201,7 +202,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/retirar'
     | '/tarjetas'
-    | '/trabajador'
+    | '/trabajador-panel'
     | '/transferir'
     | '/auth/callback'
     | '/auth/code'
@@ -220,7 +221,7 @@ export interface FileRouteTypes {
     | '/_authenticated/perfil'
     | '/_authenticated/retirar'
     | '/_authenticated/tarjetas'
-    | '/_authenticated/trabajador'
+    | '/_authenticated/trabajador-panel'
     | '/_authenticated/transferir'
     | '/auth/callback'
     | '/auth/code'
@@ -294,11 +295,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTransferirRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/trabajador': {
-      id: '/_authenticated/trabajador'
-      path: '/trabajador'
-      fullPath: '/trabajador'
-      preLoaderRoute: typeof AuthenticatedTrabajadorRouteImport
+    '/_authenticated/trabajador-panel': {
+      id: '/_authenticated/trabajador-panel'
+      path: '/trabajador-panel'
+      fullPath: '/trabajador-panel'
+      preLoaderRoute: typeof AuthenticatedTrabajadorPanelRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/tarjetas': {
@@ -369,7 +370,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedRetirarRoute: typeof AuthenticatedRetirarRoute
   AuthenticatedTarjetasRoute: typeof AuthenticatedTarjetasRoute
-  AuthenticatedTrabajadorRoute: typeof AuthenticatedTrabajadorRoute
+  AuthenticatedTrabajadorPanelRoute: typeof AuthenticatedTrabajadorPanelRoute
   AuthenticatedTransferirRoute: typeof AuthenticatedTransferirRoute
 }
 
@@ -382,7 +383,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedRetirarRoute: AuthenticatedRetirarRoute,
   AuthenticatedTarjetasRoute: AuthenticatedTarjetasRoute,
-  AuthenticatedTrabajadorRoute: AuthenticatedTrabajadorRoute,
+  AuthenticatedTrabajadorPanelRoute: AuthenticatedTrabajadorPanelRoute,
   AuthenticatedTransferirRoute: AuthenticatedTransferirRoute,
 }
 
@@ -402,3 +403,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
