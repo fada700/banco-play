@@ -53,7 +53,13 @@ function CodePage() {
       });
       if (signErr) throw signErr;
       sessionStorage.removeItem("bmx_login");
-      navigate({ to: "/home" });
+      const dest = sessionStorage.getItem("bmx_post_login_redirect");
+      sessionStorage.removeItem("bmx_post_login_redirect");
+      if (dest === "/admin" || dest === "/trabajador-panel") {
+        window.location.replace(dest);
+      } else {
+        navigate({ to: "/home" });
+      }
     } catch (e) {
       setError((e as Error).message);
       setDigits("");
