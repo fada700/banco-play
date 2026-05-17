@@ -85,31 +85,14 @@ function CreditoPage() {
       {(c?.estado === "activa" || c?.estado === "bloqueada") && c.numero && (
         <>
           <section className="container-app mt-6">
-            <div className="flip-perspective">
-              <div className={`flip-inner ${flipped ? "flipped" : ""} cursor-pointer`} onClick={() => setFlipped((v) => !v)}>
-                <div className="flip-face bg-gradient-to-br from-amber-700 via-amber-900 to-stone-900 text-amber-50 rounded-2xl p-5 aspect-[1.6/1] flex flex-col justify-between shadow-lg">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="text-xs uppercase tracking-widest opacity-70">Crédito</div>
-                      <div className="text-sm font-semibold mt-1">Banco De México</div>
-                    </div>
-                    {c.estado === "bloqueada" && (
-                      <div className="text-[10px] uppercase tracking-widest bg-white/15 px-2 py-1 rounded-full">Bloqueada</div>
-                    )}
-                  </div>
-                  <div className="font-mono text-lg tracking-widest">{maskCardNumber(c.numero)}</div>
-                  <div className="flex justify-between items-end text-xs">
-                    <div><div className="opacity-50 uppercase">Límite</div><div className="font-mono">{formatMXN(c.limite)}</div></div>
-                    <div><div className="opacity-50 uppercase">Vence</div><div className="font-mono">{c.vencimiento}</div></div>
-                  </div>
-                </div>
-                <div className="flip-face flip-face-back bg-gradient-to-br from-amber-700 via-amber-900 to-stone-900 text-amber-50 rounded-2xl p-5 aspect-[1.6/1] flex flex-col justify-between shadow-lg">
-                  <div className="h-10 -mx-5 bg-black/60 mt-3" />
-                  <div className="bg-white/90 text-black rounded px-3 py-2 font-mono text-lg w-32 self-end">{c.cvv}</div>
-                  <div className="text-[10px] opacity-60 uppercase tracking-widest">Toca para voltear</div>
-                </div>
-              </div>
-            </div>
+            <CreditCard
+              numero={c.numero}
+              cvv={c.cvv ?? "000"}
+              vencimiento={c.vencimiento ?? "--/--"}
+              titular={me?.nombre ?? ""}
+              limite={c.limite}
+              bloqueada={c.estado === "bloqueada"}
+            />
           </section>
 
           <section className="container-app mt-6 grid grid-cols-3 gap-3 text-center">
