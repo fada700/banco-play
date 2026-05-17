@@ -64,18 +64,18 @@ function PerfilPage() {
         <Row k="Saldo cartera" v={formatMXN(data.saldo_cartera)} mono />
       </section>
 
-      {(data.roles.includes("admin") || data.roles.includes("trabajador")) && (
-        <section className="container-app mt-6 space-y-2">
-          <Link to="/trabajador" className="bmx-tap block w-full rounded-2xl border border-border bg-surface py-4 text-sm font-semibold text-center">
-            Panel trabajador
-          </Link>
-          {data.roles.includes("admin") && (
-            <Link to="/admin" className="bmx-tap block w-full rounded-2xl border border-border bg-surface py-4 text-sm font-semibold text-center">
-              Panel admin
-            </Link>
-          )}
-        </section>
-      )}
+      <section className="container-app mt-6 space-y-2">
+        <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground px-1">Staff</div>
+        <Link to="/trabajador-login" className="bmx-tap block w-full rounded-2xl border border-border bg-surface py-4 text-sm font-semibold text-center">
+          Panel trabajador
+        </Link>
+        <Link to="/admin-login" className="bmx-tap block w-full rounded-2xl border border-border bg-surface py-4 text-sm font-semibold text-center">
+          Panel admin
+        </Link>
+        <p className="text-[10px] text-muted-foreground text-center px-2">
+          Solo accesible con rol en Discord. No funciona dentro de la app instalada.
+        </p>
+      </section>
 
       <section className="container-app mt-6">
         <button
