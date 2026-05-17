@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { NumPad, useAmount } from "@/components/NumPad";
+import { CvvDialog } from "@/components/CvvDialog";
 import { getMe } from "@/lib/usuario.functions";
 import { transferir } from "@/lib/movimientos.functions";
 import { formatMXN } from "@/lib/format";
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/_authenticated/transferir")({
 });
 
 const COMISION_DEFAULT = 2; // visual fallback; backend usa el real
+const UMBRAL_CVV = 35_000;
 
 function TransferirPage() {
   const router = useRouter();
@@ -26,14 +28,15 @@ function TransferirPage() {
   const [concepto, setConcepto] = useState("");
   const { value, setValue, number } = useAmount();
   const [loading, setLoading] = useState(false);
+  const [cvvOpen, setCvvOpen] = useState(false);
 
   const max = data?.saldo_banco ?? 0;
   const comision = +(number * (COMISION_DEFAULT / 100)).toFixed(2);
   const total = number + comision;
   const validMonto = number > 0 && total <= max;
+  const requiereCvv = number > UMBRAL_CVV;
 
-  const submit = async () => {
-    if (!validMonto || loading || destino.length === 0) return;
+  const doTransfer = async () => {
     setLoading(true);
     try {
       const r = await fnTransferir({
@@ -47,6 +50,12 @@ function TransferirPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const submit = async () => {
+    if (!validMonto || loading || destino.length === 0) return;
+    if (requiereCvv) { setCvvOpen(true); return; }
+    await doTransfer();
   };
 
   return (
