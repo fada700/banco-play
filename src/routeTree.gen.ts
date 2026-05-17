@@ -9,7 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TrabajadorLoginRouteImport } from './routes/trabajador-login'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AdminLoginRouteImport } from './routes/admin-login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthCodeRouteImport } from './routes/auth/code'
@@ -25,9 +27,19 @@ import { Route as AuthenticatedDepositarRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCreditoRouteImport } from './routes/_authenticated/credito'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
+const TrabajadorLoginRoute = TrabajadorLoginRouteImport.update({
+  id: '/trabajador-login',
+  path: '/trabajador-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin-login',
+  path: '/admin-login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -102,7 +114,9 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin-login': typeof AdminLoginRoute
   '/login': typeof LoginRoute
+  '/trabajador-login': typeof TrabajadorLoginRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/credito': typeof AuthenticatedCreditoRoute
   '/depositar': typeof AuthenticatedDepositarRoute
@@ -118,7 +132,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin-login': typeof AdminLoginRoute
   '/login': typeof LoginRoute
+  '/trabajador-login': typeof TrabajadorLoginRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/credito': typeof AuthenticatedCreditoRoute
   '/depositar': typeof AuthenticatedDepositarRoute
@@ -136,7 +152,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/admin-login': typeof AdminLoginRoute
   '/login': typeof LoginRoute
+  '/trabajador-login': typeof TrabajadorLoginRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/credito': typeof AuthenticatedCreditoRoute
   '/_authenticated/depositar': typeof AuthenticatedDepositarRoute
@@ -154,7 +172,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin-login'
     | '/login'
+    | '/trabajador-login'
     | '/admin'
     | '/credito'
     | '/depositar'
@@ -170,7 +190,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin-login'
     | '/login'
+    | '/trabajador-login'
     | '/admin'
     | '/credito'
     | '/depositar'
@@ -187,7 +209,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/admin-login'
     | '/login'
+    | '/trabajador-login'
     | '/_authenticated/admin'
     | '/_authenticated/credito'
     | '/_authenticated/depositar'
@@ -205,18 +229,34 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
   LoginRoute: typeof LoginRoute
+  TrabajadorLoginRoute: typeof TrabajadorLoginRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthCodeRoute: typeof AuthCodeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/trabajador-login': {
+      id: '/trabajador-login'
+      path: '/trabajador-login'
+      fullPath: '/trabajador-login'
+      preLoaderRoute: typeof TrabajadorLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-login': {
+      id: '/admin-login'
+      path: '/admin-login'
+      fullPath: '/admin-login'
+      preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -353,10 +393,22 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
   LoginRoute: LoginRoute,
+  TrabajadorLoginRoute: TrabajadorLoginRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthCodeRoute: AuthCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
