@@ -167,6 +167,13 @@ function TransferirPage() {
           </div>
         </div>
       )}
+
+      <CvvDialog
+        open={cvvOpen}
+        monto={number}
+        onClose={() => setCvvOpen(false)}
+        onSuccess={() => { setCvvOpen(false); void doTransfer(); }}
+      />
     </div>
   );
 }

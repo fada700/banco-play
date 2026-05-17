@@ -4,7 +4,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { getMe } from "@/lib/usuario.functions";
 import { toggleTarjeta } from "@/lib/movimientos.functions";
-import { maskCardNumber, formatMXN } from "@/lib/format";
+import { formatMXN } from "@/lib/format";
+import { DebitCard } from "@/components/DebitCard";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/tarjetas")({
@@ -16,8 +17,8 @@ function TarjetasPage() {
   const fetchMe = useServerFn(getMe);
   const fnToggle = useServerFn(toggleTarjeta);
   const { data, isLoading } = useQuery({ queryKey: ["me"], queryFn: () => fetchMe() });
-  const [flipped, setFlipped] = useState(false);
   const [busy, setBusy] = useState(false);
+  // flipped state handled inside DebitCard now
 
   const card = data?.tarjeta_debito;
 
