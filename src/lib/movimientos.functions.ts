@@ -73,6 +73,24 @@ export const toggleTarjeta = createServerFn({ method: "POST" })
     return { congelada: data as boolean };
   });
 
+export const verificarCvv = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { cvv: string }) =>
+    z.object({ cvv: z.string().regex(/^\d{3}$/) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const uid = await usuarioIdFromAuth(context.userId);
+    const { data: row } = await supabaseAdmin
+      .from("tarjetas_debito")
+      .select("cvv, congelada")
+      .eq("usuario_id", uid)
+      .maybeSingle();
+    if (!row) throw new Error("No tienes tarjeta de débito");
+    if (row.congelada) throw new Error("Tu tarjeta está congelada");
+    if (row.cvv !== data.cvv) throw new Error("CVV incorrecto");
+    return { ok: true };
+  });
+
 export interface Movimiento {
   id: string;
   tipo: TipoMovimiento;
