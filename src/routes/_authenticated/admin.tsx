@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsPwa } from "@/hooks/use-is-pwa";
 import { getMe } from "@/lib/usuario.functions";
-import { buscarUsuarios, adminAjustarSaldo, getGanancias, setDueno } from "@/lib/staff.functions";
+import { buscarUsuarios, adminAjustarSaldo, getGanancias, setDueno, listarCreditos } from "@/lib/staff.functions";
 import { formatMXN } from "@/lib/format";
 import { PwaBlocked, NoAccess } from "./trabajador-panel";
 
