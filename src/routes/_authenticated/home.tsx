@@ -3,7 +3,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { getMe } from "@/lib/usuario.functions";
-import { formatMXN, maskCardNumber, greetingByHour } from "@/lib/format";
+import { formatMXN, greetingByHour } from "@/lib/format";
+import { DebitCard } from "@/components/DebitCard";
 
 export const Route = createFileRoute("/_authenticated/home")({
   component: HomePage,
@@ -15,7 +16,6 @@ function HomePage() {
 
   const [hideCartera, setHideCartera] = useState(false);
   const [hideBanco, setHideBanco] = useState(false);
-  const [flipped, setFlipped] = useState(false);
 
   if (isLoading) {
     return (
@@ -78,40 +78,14 @@ function HomePage() {
       {/* Tarjeta débito */}
       {card && (
         <section className="container-app mt-5">
-          <div className="flip-perspective">
-            <div
-              className={`flip-inner ${flipped ? "flipped" : ""} cursor-pointer`}
-              onClick={() => setFlipped((v) => !v)}
-            >
-              <div className="flip-face bg-card-debit text-card-debit-foreground rounded-2xl p-5 aspect-[1.6/1] flex flex-col justify-between shadow-lg">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="text-xs uppercase tracking-widest opacity-70">Débito</div>
-                    <div className="text-sm font-semibold mt-1">Banco De México</div>
-                  </div>
-                  <div className="text-xs opacity-70">{card.congelada ? "● Congelada" : ""}</div>
-                </div>
-                <div className="font-mono text-lg tracking-widest">{maskCardNumber(card.numero)}</div>
-                <div className="flex justify-between items-end text-xs">
-                  <div>
-                    <div className="opacity-50 uppercase">Titular</div>
-                    <div className="font-medium uppercase">{data.nombre}</div>
-                  </div>
-                  <div>
-                    <div className="opacity-50 uppercase">Vence</div>
-                    <div className="font-mono">{card.vencimiento}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="flip-face flip-face-back bg-card-debit text-card-debit-foreground rounded-2xl p-5 aspect-[1.6/1] flex flex-col justify-between shadow-lg">
-                <div className="h-10 -mx-5 bg-black/60 mt-3" />
-                <div className="bg-white/90 text-black rounded px-3 py-2 font-mono text-lg w-32 self-end">
-                  {card.cvv}
-                </div>
-                <div className="text-[10px] opacity-60 uppercase tracking-widest">CVV — Toca para voltear</div>
-              </div>
-            </div>
-          </div>
+          <DebitCard
+            numero={card.numero}
+            cvv={card.cvv}
+            vencimiento={card.vencimiento}
+            titular={data.nombre}
+            congelada={card.congelada}
+            membresia={(data.membresia as "basica" | "plus" | "black") ?? "basica"}
+          />
         </section>
       )}
 

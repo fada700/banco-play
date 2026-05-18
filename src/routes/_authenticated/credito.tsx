@@ -19,12 +19,13 @@ function CreditoPage() {
   const fnUsar = useServerFn(usarCredito);
   const fnPagar = useServerFn(pagarCredito);
 
+  const fetchMe = useServerFn(getMe);
+  const { data: me } = useQuery({ queryKey: ["me"], queryFn: () => fetchMe(), staleTime: 60_000 });
   const { data, isLoading } = useQuery({ queryKey: ["credito"], queryFn: () => fnGet() });
 
   const [usarMonto, setUsarMonto] = useState("");
   const [pagarMonto, setPagarMonto] = useState("");
   const [busy, setBusy] = useState(false);
-  const [flipped, setFlipped] = useState(false);
 
   const handle = async (fn: () => Promise<unknown>, ok: string) => {
     if (busy) return;
