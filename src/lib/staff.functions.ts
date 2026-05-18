@@ -107,6 +107,51 @@ export const listarDeudores = createServerFn({ method: "GET" })
     }));
   });
 
+export interface CreditoRow {
+  usuario_id: string;
+  nombre: string;
+  numero_cliente: string;
+  estado: string;
+  limite: number;
+  saldo_usado: number;
+  disponible: number;
+  score: number;
+  dias_vencidos: number;
+  nivel: number;
+}
+
+export const listarCreditos = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<CreditoRow[]> => {
+    await assertStaff(context.userId);
+    const { data } = await supabaseAdmin
+      .from("tarjetas_credito")
+      .select("usuario_id, estado, limite, saldo_usado, score, dias_vencidos, nivel")
+      .neq("estado", "sin_solicitar")
+      .order("saldo_usado", { ascending: false });
+    if (!data?.length) return [];
+    const ids = data.map((r) => r.usuario_id);
+    const { data: users } = await supabaseAdmin
+      .from("usuarios").select("id, nombre, numero_cliente").in("id", ids);
+    const byId = new Map((users ?? []).map((u) => [u.id, u]));
+    return data.map((r) => {
+      const limite = Number(r.limite);
+      const usado = Number(r.saldo_usado);
+      return {
+        usuario_id: r.usuario_id,
+        nombre: byId.get(r.usuario_id)?.nombre ?? "—",
+        numero_cliente: byId.get(r.usuario_id)?.numero_cliente ?? "—",
+        estado: r.estado,
+        limite,
+        saldo_usado: usado,
+        disponible: Math.max(0, limite - usado),
+        score: r.score,
+        dias_vencidos: r.dias_vencidos,
+        nivel: r.nivel,
+      };
+    });
+  });
+
 export const ajustarLimite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { usuario_id: string; nuevo_limite: number }) =>
