@@ -27,11 +27,18 @@ function AdminPage() {
   const fnAjustar = useServerFn(adminAjustarSaldo);
   const fnGan = useServerFn(getGanancias);
   const fnDueno = useServerFn(setDueno);
+  const fnCreditos = useServerFn(listarCreditos);
 
   const { data: me, isLoading: meLoading } = useQuery({
     queryKey: ["me"], queryFn: () => fetchMe(), staleTime: 60_000,
   });
   const isAdmin = !!me?.roles.includes("admin");
+
+  const { data: creditos } = useQuery({
+    queryKey: ["admin-creditos"], queryFn: () => fnCreditos(),
+    enabled: isAdmin && isPwa === false,
+    staleTime: 30_000,
+  });
 
   const [q, setQ] = useState("");
   const { data: users } = useQuery({
