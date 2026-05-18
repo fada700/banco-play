@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsPwa } from "@/hooks/use-is-pwa";
 import { getMe } from "@/lib/usuario.functions";
-import { buscarUsuarios, adminAjustarSaldo, getGanancias, setDueno } from "@/lib/staff.functions";
+import { buscarUsuarios, adminAjustarSaldo, getGanancias, setDueno, listarCreditos } from "@/lib/staff.functions";
 import { formatMXN } from "@/lib/format";
 import { PwaBlocked, NoAccess } from "./trabajador-panel";
 
@@ -27,11 +27,18 @@ function AdminPage() {
   const fnAjustar = useServerFn(adminAjustarSaldo);
   const fnGan = useServerFn(getGanancias);
   const fnDueno = useServerFn(setDueno);
+  const fnCreditos = useServerFn(listarCreditos);
 
   const { data: me, isLoading: meLoading } = useQuery({
     queryKey: ["me"], queryFn: () => fetchMe(), staleTime: 60_000,
   });
   const isAdmin = !!me?.roles.includes("admin");
+
+  const { data: creditos } = useQuery({
+    queryKey: ["admin-creditos"], queryFn: () => fnCreditos(),
+    enabled: isAdmin && isPwa === false,
+    staleTime: 30_000,
+  });
 
   const [q, setQ] = useState("");
   const { data: users } = useQuery({
@@ -158,6 +165,28 @@ function AdminPage() {
                   </button>
                 </div>
               )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="container-app mt-8">
+        <h2 className="text-base font-semibold mb-3">Tarjetas de crédito activas</h2>
+        <div className="rounded-2xl border border-border bg-surface divide-y divide-border">
+          {!creditos?.length && <div className="p-5 text-sm text-muted-foreground text-center">Sin tarjetas de crédito</div>}
+          {creditos?.map((c) => (
+            <div key={c.usuario_id} className="p-4 flex items-center justify-between">
+              <div className="min-w-0">
+                <div className="text-sm font-medium truncate">{c.nombre}</div>
+                <div className="text-[11px] text-muted-foreground font-mono truncate">
+                  {c.numero_cliente} · {c.estado} · N{c.nivel} · score {c.score}
+                  {c.dias_vencidos > 0 && <span className="text-destructive"> · {c.dias_vencidos}d vencido</span>}
+                </div>
+              </div>
+              <div className="text-right shrink-0 ml-3">
+                <div className="text-sm font-mono">{formatMXN(c.saldo_usado)}</div>
+                <div className="text-[10px] text-muted-foreground">de {formatMXN(c.limite)}</div>
+              </div>
             </div>
           ))}
         </div>

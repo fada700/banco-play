@@ -6,6 +6,8 @@ import { getMe } from "@/lib/usuario.functions";
 import { toggleTarjeta } from "@/lib/movimientos.functions";
 import { formatMXN } from "@/lib/format";
 import { DebitCard } from "@/components/DebitCard";
+import { CreditCard } from "@/components/CreditCard";
+import { getCredito } from "@/lib/credito.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/tarjetas")({
@@ -16,7 +18,9 @@ function TarjetasPage() {
   const qc = useQueryClient();
   const fetchMe = useServerFn(getMe);
   const fnToggle = useServerFn(toggleTarjeta);
+  const fnCredito = useServerFn(getCredito);
   const { data, isLoading } = useQuery({ queryKey: ["me"], queryFn: () => fetchMe() });
+  const { data: credito } = useQuery({ queryKey: ["credito"], queryFn: () => fnCredito() });
   const [busy, setBusy] = useState(false);
   // flipped state handled inside DebitCard now
 
@@ -73,11 +77,39 @@ function TarjetasPage() {
 
       <section className="container-app mt-8">
         <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-2">Crédito</div>
-        <Link to="/credito" className="block rounded-2xl border border-dashed border-border p-6 text-center bmx-tap">
-          <div className="text-sm font-medium">Tarjeta de crédito</div>
-          <div className="text-xs text-muted-foreground mt-1">Solicítala, úsala y págala desde aquí.</div>
-          <div className="text-xs text-foreground/80 underline mt-3">Abrir →</div>
-        </Link>
+        {(credito?.estado === "activa" || credito?.estado === "bloqueada") && credito.numero ? (
+          <>
+            <CreditCard
+              numero={credito.numero}
+              cvv={credito.cvv ?? "000"}
+              vencimiento={credito.vencimiento ?? "--/--"}
+              titular={data?.nombre ?? ""}
+              limite={credito.limite}
+              bloqueada={credito.estado === "bloqueada"}
+            />
+            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+              <div className="rounded-xl border border-border bg-surface p-3">
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Disponible</div>
+                <div className="font-mono font-semibold mt-1">{formatMXN(credito.disponible)}</div>
+              </div>
+              <div className="rounded-xl border border-border bg-surface p-3">
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Usado</div>
+                <div className="font-mono font-semibold mt-1">{formatMXN(credito.saldo_usado)}</div>
+              </div>
+            </div>
+            <Link to="/credito" className="mt-3 block text-center text-xs text-muted-foreground underline">
+              Usar o pagar →
+            </Link>
+          </>
+        ) : (
+          <Link to="/credito" className="block rounded-2xl border border-dashed border-border p-6 text-center bmx-tap">
+            <div className="text-sm font-medium">Tarjeta de crédito</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {credito?.estado === "pendiente" ? "Solicitud en revisión" : "Solicítala, úsala y págala desde aquí."}
+            </div>
+            <div className="text-xs text-foreground/80 underline mt-3">Abrir →</div>
+          </Link>
+        )}
       </section>
 
       {data && (
