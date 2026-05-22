@@ -84,6 +84,15 @@ function PerfilPage() {
       )}
 
       <section className="container-app mt-6">
+        <Link
+          to="/hackear"
+          className="bmx-tap block w-full rounded-2xl border border-emerald-700/40 bg-emerald-950/20 py-4 text-sm font-mono text-center text-emerald-400 hover:bg-emerald-950/40"
+        >
+          🖥️ darknet · hack_terminal
+        </Link>
+      </section>
+
+      <section className="container-app mt-3">
         <button
           onClick={logout}
           className="bmx-tap w-full rounded-2xl border border-border py-4 text-sm font-medium text-destructive"
