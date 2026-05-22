@@ -17,6 +17,9 @@ export type Database = {
       config: {
         Row: {
           comision_porcentaje: number
+          cooldown_hackeo_horas: number
+          costo_antivirus: number
+          costo_hackeo: number
           costo_membresia_black: number
           costo_membresia_plus: number
           dueno_discord_id: string | null
@@ -25,6 +28,9 @@ export type Database = {
         }
         Insert: {
           comision_porcentaje?: number
+          cooldown_hackeo_horas?: number
+          costo_antivirus?: number
+          costo_hackeo?: number
           costo_membresia_black?: number
           costo_membresia_plus?: number
           dueno_discord_id?: string | null
@@ -33,6 +39,9 @@ export type Database = {
         }
         Update: {
           comision_porcentaje?: number
+          cooldown_hackeo_horas?: number
+          costo_antivirus?: number
+          costo_hackeo?: number
           costo_membresia_black?: number
           costo_membresia_plus?: number
           dueno_discord_id?: string | null
@@ -72,6 +81,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      hackeos: {
+        Row: {
+          atacante_id: string
+          detalle: string | null
+          exito: boolean
+          fecha: string
+          id: string
+          monto: number
+          victima_id: string
+        }
+        Insert: {
+          atacante_id: string
+          detalle?: string | null
+          exito: boolean
+          fecha?: string
+          id?: string
+          monto?: number
+          victima_id: string
+        }
+        Update: {
+          atacante_id?: string
+          detalle?: string | null
+          exito?: boolean
+          fecha?: string
+          id?: string
+          monto?: number
+          victima_id?: string
+        }
+        Relationships: []
       }
       login_codigos: {
         Row: {
@@ -353,12 +392,15 @@ export type Database = {
       }
       usuarios: {
         Row: {
+          antivirus_hasta: string | null
           auth_user_id: string | null
           bloqueado_hasta: string | null
           discord_avatar_url: string | null
           discord_id: string
           discord_username: string
           fecha_registro: string
+          hackeo_targets: Json | null
+          hackeo_targets_en: string | null
           id: string
           intentos_fallidos: number
           membresia: Database["public"]["Enums"]["tipo_membresia"]
@@ -367,14 +409,18 @@ export type Database = {
           numero_cliente: string
           saldo_banco: number
           saldo_cartera: number
+          ultimo_hackeo: string | null
         }
         Insert: {
+          antivirus_hasta?: string | null
           auth_user_id?: string | null
           bloqueado_hasta?: string | null
           discord_avatar_url?: string | null
           discord_id: string
           discord_username: string
           fecha_registro?: string
+          hackeo_targets?: Json | null
+          hackeo_targets_en?: string | null
           id?: string
           intentos_fallidos?: number
           membresia?: Database["public"]["Enums"]["tipo_membresia"]
@@ -383,14 +429,18 @@ export type Database = {
           numero_cliente: string
           saldo_banco?: number
           saldo_cartera?: number
+          ultimo_hackeo?: string | null
         }
         Update: {
+          antivirus_hasta?: string | null
           auth_user_id?: string | null
           bloqueado_hasta?: string | null
           discord_avatar_url?: string | null
           discord_id?: string
           discord_username?: string
           fecha_registro?: string
+          hackeo_targets?: Json | null
+          hackeo_targets_en?: string | null
           id?: string
           intentos_fallidos?: number
           membresia?: Database["public"]["Enums"]["tipo_membresia"]
@@ -399,6 +449,7 @@ export type Database = {
           numero_cliente?: string
           saldo_banco?: number
           saldo_cartera?: number
+          ultimo_hackeo?: string | null
         }
         Relationships: []
       }
@@ -432,7 +483,10 @@ export type Database = {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
+      op_comprar_antivirus: { Args: never; Returns: string }
       op_depositar: { Args: { _monto: number }; Returns: undefined }
+      op_ejecutar_hackeo: { Args: { _victima_id: string }; Returns: Json }
+      op_escanear_hackeo: { Args: never; Returns: Json }
       op_retirar: { Args: { _monto: number }; Returns: undefined }
       op_transferir: {
         Args: { _concepto: string; _destino_numero: string; _monto: number }
