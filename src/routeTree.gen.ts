@@ -23,6 +23,7 @@ import { Route as AuthenticatedRetirarRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedHistorialRouteImport } from './routes/_authenticated/historial'
+import { Route as AuthenticatedHackearRouteImport } from './routes/_authenticated/hackear'
 import { Route as AuthenticatedDepositarRouteImport } from './routes/_authenticated/depositar'
 import { Route as AuthenticatedCreditoRouteImport } from './routes/_authenticated/credito'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -97,6 +98,11 @@ const AuthenticatedHistorialRoute = AuthenticatedHistorialRouteImport.update({
   path: '/historial',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedHackearRoute = AuthenticatedHackearRouteImport.update({
+  id: '/hackear',
+  path: '/hackear',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedDepositarRoute = AuthenticatedDepositarRouteImport.update({
   id: '/depositar',
   path: '/depositar',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/credito': typeof AuthenticatedCreditoRoute
   '/depositar': typeof AuthenticatedDepositarRoute
+  '/hackear': typeof AuthenticatedHackearRoute
   '/historial': typeof AuthenticatedHistorialRoute
   '/home': typeof AuthenticatedHomeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/credito': typeof AuthenticatedCreditoRoute
   '/depositar': typeof AuthenticatedDepositarRoute
+  '/hackear': typeof AuthenticatedHackearRoute
   '/historial': typeof AuthenticatedHistorialRoute
   '/home': typeof AuthenticatedHomeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/credito': typeof AuthenticatedCreditoRoute
   '/_authenticated/depositar': typeof AuthenticatedDepositarRoute
+  '/_authenticated/hackear': typeof AuthenticatedHackearRoute
   '/_authenticated/historial': typeof AuthenticatedHistorialRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/credito'
     | '/depositar'
+    | '/hackear'
     | '/historial'
     | '/home'
     | '/perfil'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/credito'
     | '/depositar'
+    | '/hackear'
     | '/historial'
     | '/home'
     | '/perfil'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/credito'
     | '/_authenticated/depositar'
+    | '/_authenticated/hackear'
     | '/_authenticated/historial'
     | '/_authenticated/home'
     | '/_authenticated/perfil'
@@ -337,6 +349,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHistorialRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/hackear': {
+      id: '/_authenticated/hackear'
+      path: '/hackear'
+      fullPath: '/hackear'
+      preLoaderRoute: typeof AuthenticatedHackearRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/depositar': {
       id: '/_authenticated/depositar'
       path: '/depositar'
@@ -365,6 +384,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedCreditoRoute: typeof AuthenticatedCreditoRoute
   AuthenticatedDepositarRoute: typeof AuthenticatedDepositarRoute
+  AuthenticatedHackearRoute: typeof AuthenticatedHackearRoute
   AuthenticatedHistorialRoute: typeof AuthenticatedHistorialRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
@@ -378,6 +398,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedCreditoRoute: AuthenticatedCreditoRoute,
   AuthenticatedDepositarRoute: AuthenticatedDepositarRoute,
+  AuthenticatedHackearRoute: AuthenticatedHackearRoute,
   AuthenticatedHistorialRoute: AuthenticatedHistorialRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
